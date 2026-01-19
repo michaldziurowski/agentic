@@ -1,0 +1,81 @@
+{
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "includeCoAuthoredBy": false,
+  "permissions": {
+    "allow": [
+      "Read",
+      "Grep",
+      "Bash(go:*)",
+      "Bash(git add:*)",
+      "Bash(git checkout:*)",
+      "Bash(git branch:*)",
+      "Bash(git diff:*)",
+      "Bash(git fetch:*)",
+      "Bash(git log:*)",
+      "Bash(git pull:*)",
+      "Bash(git rebase:*)",
+      "Bash(git stash:*)",
+      "Bash(git status:*)",
+      "Bash(git worktree:*)",
+      "Bash(git -C:*)",
+      "Bash(docker compose:*)",
+      "Bash(tree:*)",
+      "Bash(chmod:*)",
+      "Bash(cat:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(ls:*)",
+      "Bash(mkdir:*)",
+      "Bash(xargs:*)",
+      "Bash(tail:*)",
+      "Bash(gh api:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr status:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(gh issue view:*)",
+      "Bash(gh issue list:*)",
+      "Bash(gh repo view:*)",
+      "Skill(backend:*)",
+      "WebSearch"
+    ],
+    "deny": [
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Read(**/*_rsa)",
+      "Read(**/*_ed25519)",
+      "Read(**/*.p12)",
+      "Read(**/*.pfx)",
+      "Read(**/.netrc)",
+      "Read(**/.npmrc)",
+      "Read(**/.pypirc)",
+      "Read(**/.aws/credentials)",
+      "Read(**/.ssh/*)",
+      "Read(**/credentials.json)",
+      "Read(**/secrets.json)",
+      "Read(**/secrets.yaml)",
+      "Read(**/secrets.yml)"
+    ],
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(gh pr create:*)",
+      "Bash(gh pr merge:*)",
+      "Bash(gh pr close:*)",
+      "Bash(gh pr edit:*)",
+      "Bash(gh issue create:*)",
+      "Bash(gh issue close:*)",
+      "Bash(gh issue edit:*)",
+      "Bash(gh release:*)",
+      "Bash(gh repo delete:*)"
+    ]
+  },
+  "enabledPlugins": {
+    "example-skills@anthropic-agent-skills": true,
+    "backend@brainly": true
+  }
+}
