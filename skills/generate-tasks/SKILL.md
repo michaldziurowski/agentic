@@ -9,24 +9,23 @@ Creates step-by-step task lists for developers implementing features.
 
 ## Workflow
 
-Phase 1: Parent Tasks
+Phase 1: Present Parent Tasks for Approval
 1. Analyze requirements from user input or documentation
 2. Generate 4-6 high-level parent tasks
-3. Save to `/docs/` with appropriate filename (see naming below)
-4. Present tasks and ask: "Ready to generate sub-tasks? Respond with 'Go' to proceed."
-5. Stop and wait for user confirmation
+3. Present tasks and ask: "Ready to generate sub-tasks? Respond with 'Go' to proceed."
+4. Stop and wait for user confirmation
 
-Phase 2: Sub-Tasks (after user confirms)
+Phase 2: Generate Sub-Tasks and Save (after user confirms)
 1. Break each parent into actionable sub-tasks
 2. Identify files to create or modify
-3. Update the task file with complete structure
+3. Save the complete task file to `/docs/` with appropriate filename (see naming below)
 
 ## File Naming
 
 Default: `tasks-[feature-name].md`
 
-If source is a PRD with number prefix (e.g., `001_prd_user_auth.md`):
-Use same prefix: `001_tasks_user_auth.md`
+If source is a PRD with number prefix (e.g., `001_prd_user-auth.md`):
+Use same prefix: `001_tasks_user-auth.md`
 
 ## Output Format
 
@@ -56,3 +55,10 @@ Save to `/docs/`:
 - Sub-tasks must be concrete and actionable
 - Include test files in Relevant Files section
 - Number format: `1.0` for parents, `1.1` for sub-tasks
+
+## When Implementing Tasks
+
+When working through a task list:
+- Mark each sub-task as done (`- [x]`) immediately after completing it
+- Mark the parent task as done after all its sub-tasks are complete
+- Update the markdown file incrementally, not all at once at the end
