@@ -10,7 +10,7 @@ Generate a Product Requirements Document from a user's feature request.
 ## Process
 
 1. Receive initial feature description from user
-2. Ask 3-5 clarifying questions (no more)
+2. Ask 3-8 clarifying questions to resolve all ambiguity
 3. Generate PRD based on answers
 4. Save to `/docs/[NNN]_prd_[feature-name].md`
 
@@ -20,7 +20,8 @@ You must not implement the feature.
 ## Clarifying Questions
 
 Ask only when the answer is not inferable from the prompt.
-Limit to 3-5 questions covering critical gaps.
+Limit to 3-8 questions covering critical gaps.
+**Goal: Resolve all ambiguity before writing the PRD. No open questions should remain unless the user explicitly states they want to leave something open.**
 
 Focus areas:
 - Problem/Goal: What problem does this solve?
@@ -61,7 +62,7 @@ Include all sections in this order:
 5. **Non-Goals (Out of Scope)** - What this feature will not include
 6. **Design Considerations** (Optional) - UI/UX requirements, mockups
 7. **Technical Considerations** (Optional) - Constraints, dependencies
-8. **Open Questions** - Remaining areas needing clarification
+8. **Open Questions** - Only include items the user explicitly chose to leave open; otherwise this section should be empty or omitted
 
 ## Target Audience
 
@@ -90,7 +91,7 @@ Examples:
 ## Workflow
 
 1. Read user's feature request
-2. Identify 3-5 critical information gaps
+2. Identify 3-8 critical information gaps
 3. Present numbered questions with lettered options (indented)
 4. Wait for user responses
 5. Generate complete PRD with all required sections
