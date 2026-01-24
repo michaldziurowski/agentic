@@ -1,4 +1,8 @@
 {
+  "fileSuggestion": {
+    "type": "command",
+    "command": "~/.claude/file-suggestion.sh"
+  },
   "attribution": {
     "commit": "",
     "pr": ""
@@ -76,6 +80,6 @@
   },
   "enabledPlugins": {
     "example-skills@anthropic-agent-skills": true,
-    "backend@brainly": true
+    "agent-browser@agent-browser": true
   }
 }
