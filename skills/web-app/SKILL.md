@@ -7,9 +7,21 @@ description: "Use when building Go web apps. Enforces templ templates, Alpine AJ
 
 Build server-side rendered web applications with Go, templ, and Alpine AJAX.
 
-## Technology Stack
+## Philosophy
 
-You must use this exact stack:
+These principles shape every decision:
+
+1. **Semantic HTML first** - Use meaningful elements (`<article>`, `<nav>`, `<section>`, `<button>`, `<form>`), not `<div>` soup. HTML communicates structure and meaning.
+
+2. **CSS only** - Custom CSS with CSS variables for theming. No utility frameworks (Tailwind, Bootstrap). Write purposeful styles that describe what elements *are*, not how they look.
+
+3. **No JS frameworks** - Only Alpine.js + Alpine AJAX when absolutely necessary. The server renders HTML; the browser displays it.
+
+4. **Alpine.js sparingly** - Only when HTML/CSS cannot achieve the goal. Don't recreate in JavaScript what the platform already provides.
+
+5. **Don't fight the browser** - Use native form submission, links, and browser navigation. Enhance progressively, don't replace.
+
+## Technology Stack
 
 | Layer | Technology | Notes |
 |-------|------------|-------|
@@ -22,6 +34,17 @@ You must use this exact stack:
 | Styling | Plain CSS | No frameworks unless requested |
 
 State before coding: "Using Go stdlib, templ, Alpine AJAX, sqlc/SQLite, slog"
+
+## Request Flow
+
+```
+Request → Handler → Query → Template → Response
+```
+
+- **Handlers handle the request flow** - parse input, validate, call queries/services, render template
+- For simple CRUD: logic lives directly in handlers
+- For complex business logic: extract to a service layer in `internal/services/`
+- Keep handlers flat and readable; avoid premature abstraction
 
 ## Templ Code Generation
 
@@ -39,48 +62,6 @@ package templates
 ```
 
 Run `go generate ./...` before building.
-
-## Core Principles
-
-### HTML-First Development
-
-HTML and CSS can do more than you think. Before adding JavaScript, verify the behavior cannot be achieved with:
-
-- Native form submission and validation
-- CSS transitions and animations
-- Details/summary for disclosure
-- Dialog element for modals
-- Anchor links for navigation
-
-JavaScript augments HTML. It never replaces it.
-
-### Server-Driven UI
-
-The server owns the UI. Client requests HTML fragments, not JSON.
-
-Pattern:
-1. User action triggers Alpine AJAX request
-2. Server renders templ component
-3. Response HTML replaces target element
-
-No client-side templating. No JSON APIs for UI data.
-
-### Semantic Markup
-
-Every element must have semantic meaning. See @semantic-html.md for element selection guide.
-
-Required document structure:
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>...</head>
-<body>
-  <header><!-- site header, nav --></header>
-  <main><!-- primary content --></main>
-  <footer><!-- site footer --></footer>
-</body>
-</html>
-```
 
 ## Server Setup
 
@@ -113,39 +94,6 @@ func main() {
     srv.Shutdown(ctx)
 }
 ```
-
-See @project-structure.md for full directory layout.
-
-## Handler Patterns
-
-Handlers return templ components. Keep handlers thin.
-
-### Full Page Response
-
-```go
-func handleHome(w http.ResponseWriter, r *http.Request) {
-    data := HomeData{Title: "Welcome"}
-    templates.HomePage(data).Render(r.Context(), w)
-}
-```
-
-### Partial Response for Alpine AJAX
-
-Check for AJAX header to return partial or full page:
-
-```go
-func handleUsers(w http.ResponseWriter, r *http.Request) {
-    users := fetchUsers()
-
-    if r.Header.Get("X-Alpine-Request") == "true" {
-        templates.UserList(users).Render(r.Context(), w)
-        return
-    }
-    templates.UsersPage(users).Render(r.Context(), w)
-}
-```
-
-See @templ-patterns.md for component composition.
 
 ## Alpine AJAX Integration
 
@@ -192,33 +140,6 @@ templ SearchResults(results []Result) {
 | `x-target.append` | Append response to target |
 | `x-target.prepend` | Prepend response to target |
 
-### Form Submission
-
-Forms with `x-target` submit via AJAX automatically:
-
-```html
-<form x-target="messages" action="/messages" method="post">
-    <input name="content" required />
-    <button>Send</button>
-</form>
-```
-
-### Triggered Updates
-
-Use Alpine events to trigger updates:
-
-```html
-<form x-target="results" action="/search">
-    <input
-        type="search"
-        name="q"
-        @input.debounce.300ms="$el.form.requestSubmit()"
-    />
-</form>
-```
-
-See @alpine-ajax-patterns.md for advanced patterns.
-
 ## Quality Checklist
 
 Before completing any web app task, verify:
@@ -237,6 +158,7 @@ Before completing any web app task, verify:
 ## Reference Files
 
 - @project-structure.md - Directory layout and file organization
+- @handlers.md - HTTP handler patterns, routing, middleware, services
 - @templ-patterns.md - Component composition and typed props
 - @alpine-ajax-patterns.md - Dynamic content patterns
 - @semantic-html.md - Element selection guide
