@@ -10,7 +10,7 @@ Generate a Product Requirements Document from a user's feature request.
 ## Process
 
 1. Receive initial feature description from user
-2. Ask 3-8 clarifying questions to resolve all ambiguity
+2. Ask clarifying questions until all ambiguity is resolved (or user says stop)
 3. Generate PRD based on answers
 4. Save to `/docs/[NNN]_prd_[feature-name].md`
 
@@ -19,15 +19,20 @@ You must not implement the feature.
 
 ## Clarifying Questions
 
-Ask only when the answer is not inferable from the prompt.
-Limit to 3-8 questions covering critical gaps.
-**Goal: Resolve all ambiguity before writing the PRD. No open questions should remain unless the user explicitly states they want to leave something open.**
+**Leave no stone unturned.** Ask as many questions as necessary to fully understand the feature. Start with the most important questions first. Continue asking until:
+- All ambiguity is resolved, OR
+- The user explicitly says to stop or move on
 
-Focus areas:
-- Problem/Goal: What problem does this solve?
+Do not limit questions artificially. A complex feature may require many rounds of clarification. A simple feature may need only a few.
+
+Focus areas (in rough priority order):
+- Problem/Goal: What problem does this solve? Why now?
+- Users: Who experiences this problem? How severely?
 - Core Functionality: What key actions should users perform?
 - Scope: What should this feature not do?
-- Success Criteria: How do we know it's done?
+- Success Criteria: How do we measure success?
+- Constraints: Any technical, timeline, or resource limitations?
+- Dependencies: What else must exist or be true?
 
 ### Question Format
 
@@ -64,12 +69,18 @@ Include all sections in this order:
 7. **Technical Considerations** (Optional) - Constraints, dependencies
 8. **Open Questions** - Only include items the user explicitly chose to leave open; otherwise this section should be empty or omitted
 
-## Target Audience
+## Boundaries
 
-Write for a junior developer.
-Be explicit and unambiguous.
-Avoid jargon.
-Provide enough detail to understand purpose and core logic.
+A PRD describes WHAT to build, not HOW to build it.
+
+Do not include:
+- Specific file names or paths to modify
+- Function, class, or module names
+- Code snippets or pseudocode
+- Database schema or API endpoint details
+- Architecture decisions
+
+Leave implementation decisions to engineers. If technical context is needed, keep it at the level of constraints ("must work offline", "needs to support 10k concurrent users") not solutions ("use Redis", "modify auth.go").
 
 ## Output
 
@@ -91,10 +102,11 @@ Examples:
 ## Workflow
 
 1. Read user's feature request
-2. Identify 3-8 critical information gaps
+2. Identify information gaps, starting with most critical
 3. Present numbered questions with lettered options (indented)
 4. Wait for user responses
-5. Generate complete PRD with all required sections
-6. Check `/docs/` for existing PRD files to determine next number
-7. Save to `/docs/[NNN]_prd_[feature-name].md`
-8. Stop - do not implement
+5. If ambiguity remains, ask follow-up questions (repeat until resolved or user stops)
+6. Generate complete PRD with all required sections
+7. Check `/docs/` for existing PRD files to determine next number
+8. Save to `/docs/[NNN]_prd_[feature-name].md`
+9. Stop - do not implement
