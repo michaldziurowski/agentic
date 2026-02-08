@@ -14,12 +14,7 @@ project/
 │   │   └── middleware.go
 │   ├── services/             # Business logic (if needed)
 │   │   └── user.go
-│   ├── db/                   # Database layer
-│   │   ├── queries.sql       # sqlc queries
-│   │   ├── schema.sql        # Table definitions
-│   │   ├── db.go             # Generated sqlc code
-│   │   ├── models.go         # Generated models
-│   │   └── queries.sql.go    # Generated query methods
+│   ├── db/                   # Database layer (see go-database skill)
 │   └── templates/            # templ components
 │       ├── layouts/          # Base layouts
 │       │   └── base.templ
@@ -36,9 +31,6 @@ project/
 │   └── js/
 │       ├── alpine.min.js     # Alpine.js
 │       └── ajax.min.js       # Alpine AJAX plugin
-├── migrations/               # SQL migrations
-│   ├── 001_initial.up.sql
-│   └── 001_initial.down.sql
 ├── go.mod
 ├── go.sum
 ├── sqlc.yaml                 # sqlc configuration

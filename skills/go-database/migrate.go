@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"sort"
 	"strings"
+	"time"
 )
 
 //go:embed migrations/*.sql
@@ -39,7 +40,7 @@ func createMigrationsTable(ctx context.Context, db *sql.DB) error {
 	_, err := db.ExecContext(ctx, `
 		CREATE TABLE IF NOT EXISTS schema_migrations (
 			version TEXT PRIMARY KEY,
-			applied_at DATETIME DEFAULT CURRENT_TIMESTAMP
+			applied_at TEXT NOT NULL
 		)
 	`)
 	return err
@@ -90,7 +91,7 @@ func runMigration(ctx context.Context, db *sql.DB, name string) error {
 	if _, err := tx.ExecContext(ctx, string(content)); err != nil {
 		return err
 	}
-	if _, err := tx.ExecContext(ctx, "INSERT INTO schema_migrations (version) VALUES (?)", name); err != nil {
+	if _, err := tx.ExecContext(ctx, "INSERT INTO schema_migrations (version, applied_at) VALUES (?, ?)", name, time.Now().UTC().Format(time.RFC3339)); err != nil {
 		return err
 	}
 	return tx.Commit()

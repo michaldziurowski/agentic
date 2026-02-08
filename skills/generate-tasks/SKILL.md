@@ -11,25 +11,26 @@ Creates step-by-step task lists for developers implementing features.
 
 Phase 1: Present Parent Tasks for Approval
 1. Analyze requirements from user input or documentation
-2. Generate 4-6 high-level parent tasks
+2. Generate high-level parent tasks
 3. Present tasks and ask: "Ready to generate sub-tasks? Respond with 'Go' to proceed."
 4. Stop and wait for user confirmation
 
 Phase 2: Generate Sub-Tasks and Save (after user confirms)
 1. Break each parent into actionable sub-tasks
 2. Identify files to create or modify
-3. Save the complete task file to `/docs/` with appropriate filename (see naming below)
+3. Save the complete task file (see File Location below)
 
-## File Naming
+## File Location
 
-Default: `tasks-[feature-name].md`
+Save the tasks file next to the source PRD/ADR, matching its naming convention:
 
-If source is a PRD with number prefix (e.g., `001_prd_user-auth.md`):
-Use same prefix: `001_tasks_user-auth.md`
+- Source `docs/003_prd_login.md` → `docs/003_tasks_login.md`
+- Source `docs/prd/003_login.md` → `docs/prd/003_tasks_login.md`
+- Source `docs/adr/0003_login.md` → `docs/adr/0003_tasks_login.md`
+
+If there is no source document, save as `[NNN]_tasks_[feature-name].md` in `/docs/`.
 
 ## Output Format
-
-Save to `/docs/`:
 
 ```markdown
 ## Relevant Files
@@ -38,7 +39,9 @@ Save to `/docs/`:
 
 ## Instructions for Completing Tasks
 
-**IMPORTANT:** Check off tasks by changing `- [ ]` to `- [x]` after completing each sub-task.
+- Mark each sub-task as done (`- [x]`) immediately after completing it
+- Mark the parent task as done after all its sub-tasks are complete
+- Update this file incrementally, not all at once at the end
 
 ## Tasks
 
@@ -51,14 +54,8 @@ Save to `/docs/`:
 
 ## Guidelines
 
-- Target audience: junior developers
+- Sub-task granularity should match task complexity
 - Sub-tasks must be concrete and actionable
 - Include test files in Relevant Files section
 - Number format: `1.0` for parents, `1.1` for sub-tasks
 
-## When Implementing Tasks
-
-When working through a task list:
-- Mark each sub-task as done (`- [x]`) immediately after completing it
-- Mark the parent task as done after all its sub-tasks are complete
-- Update the markdown file incrementally, not all at once at the end

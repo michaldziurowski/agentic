@@ -10,9 +10,10 @@ Generate a Product Requirements Document from a user's feature request.
 ## Process
 
 1. Receive initial feature description from user
-2. Ask clarifying questions until all ambiguity is resolved (or user says stop)
-3. Generate PRD based on answers
-4. Save to `/docs/[NNN]_prd_[feature-name].md`
+2. Determine output location (see Output section)
+3. Ask clarifying questions until all ambiguity is resolved (or user says stop)
+4. Generate PRD based on answers
+5. Save to determined location
 
 You must ask clarifying questions before writing.
 You must not implement the feature.
@@ -84,29 +85,22 @@ Leave implementation decisions to engineers. If technical context is needed, kee
 
 ## Output
 
-- Format: Markdown
-- Location: `/docs/`
-- Filename: `[NNN]_prd_[feature-name].md`
+Format: Markdown
+
+### Location
+
+Check for existing PRD files matching any of these patterns:
+
+| Pattern | Path | Example |
+|---------|------|---------|
+| A | `/docs/[NNN]_prd_[feature-name].md` | `docs/003_prd_login.md` |
+| B | `/docs/prd/[NNN]_[feature-name].md` | `docs/prd/003_login.md` |
+| C | `/docs/adr/[NNNN]_[feature-name].md` | `docs/adr/0003_login.md` |
+
+If existing PRD/ADR files are found, follow the established pattern. If no existing files are found, ask the user which pattern to use.
 
 ### Filename Numbering
 
-1. Check `/docs/` for existing files matching pattern `[0-9][0-9][0-9]_prd_*`
-2. Find the highest number among existing PRD files
-3. Use that number + 1, zero-padded to 3 digits
-4. If no existing PRD files, start with `001`
-
-Examples:
-- No existing PRDs → `001_prd_user-auth.md`
-- Existing `003_prd_login.md` and `001_prd_signup.md` → `004_prd_dashboard.md`
-
-## Workflow
-
-1. Read user's feature request
-2. Identify information gaps, starting with most critical
-3. Present numbered questions with lettered options (indented)
-4. Wait for user responses
-5. If ambiguity remains, ask follow-up questions (repeat until resolved or user stops)
-6. Generate complete PRD with all required sections
-7. Check `/docs/` for existing PRD files to determine next number
-8. Save to `/docs/[NNN]_prd_[feature-name].md`
-9. Stop - do not implement
+1. Find the highest number among existing files in the chosen location
+2. Use that number + 1, zero-padded to match the pattern (3 digits for A/B, 4 digits for C)
+3. If no existing files, start with `001` (or `0001` for pattern C)

@@ -8,8 +8,7 @@ description: "Required when creating SKILL.md files for Claude Code agents. Spec
 Skills are reference guides for proven techniques.
 
 This skill specializes prompt-engineering for Claude configurations.
-Apply TDD methodology from @prompt-engineering.md:
-observe failures without the skill,
+Apply TDD methodology: observe failures without the skill,
 write minimal guidance addressing those failures,
 then refactor to close loopholes.
 

@@ -32,8 +32,8 @@ templ Base(title string) {
                 { children... }
             </main>
             @Footer()
-            <script src="/static/js/alpine.min.js" defer></script>
             <script src="/static/js/ajax.min.js" defer></script>
+            <script src="/static/js/alpine.min.js" defer></script>
         </body>
     </html>
 }

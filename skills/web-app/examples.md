@@ -171,7 +171,7 @@ Using native `<dialog>` with Alpine for control:
 ### Template
 
 ```go
-templ DeleteButton(itemID int) {
+templ DeleteButton(itemID string) {
     <div x-data="{ open: false }">
         <button type="button" @click="open = true">
             Delete
@@ -192,7 +192,7 @@ templ DeleteButton(itemID int) {
                         type="submit"
                         value="confirm"
                         class="danger"
-                        @click="deleteItem({ strconv.Itoa(itemID) })"
+                        @click="deleteItem({ itemID })"
                     >
                         Delete
                     </button>

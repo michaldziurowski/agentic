@@ -243,9 +243,9 @@ templ UpdateResponse(user User, stats Stats) {
 ```
 
 ```html
-<button x-target="user-info stats" hx-get="/refresh">
+<a x-target="user-info stats" href="/refresh">
     Refresh
-</button>
+</a>
 ```
 
 ## Server State vs Client State
@@ -279,7 +279,7 @@ User data, lists, counts - fetch from server:
     @NotificationList(notifications)
 </div>
 
-<button x-target="notifications" hx-get="/notifications">
+<a x-target="notifications" href="/notifications">
     Refresh
-</button>
+</a>
 ```
