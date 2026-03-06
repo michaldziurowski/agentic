@@ -12,12 +12,14 @@ This is a **test-first** tool. Test specs describe how functionality **should** 
 ## What to read, what to ignore
 
 **DO read** (contracts and requirements):
+
 - OpenAPI/Swagger schemas — endpoints, request/response shapes, status codes, validation rules
 - Requirements documents, PRDs, ADRs, feature specs
 - API contracts, proto files, GraphQL schemas
 - `compose.yaml` / `docker-compose.yaml` — to understand external dependencies and infrastructure
 
 **DO NOT read** (implementation):
+
 - Source code (handlers, services, repositories, models)
 - Database migrations or schema files
 - Existing test files
@@ -30,6 +32,7 @@ The point is to derive tests purely from what the feature **should** do, not fro
 ### Step 1: Determine Scope
 
 The user may provide:
+
 - **A specific feature or area** (e.g. "user management", "authentication") — scope to that area
 - **A requirements document or schema** (e.g. "the lots endpoints in openapi.yaml") — scope to that contract
 - **Nothing** — cover the entire application's contracts
@@ -56,9 +59,10 @@ If the grouping is not obvious (e.g. endpoints that could belong to multiple fea
 
 ### Step 4: Generate Test Specs
 
-For each feature, create a markdown file in a `tests/` directory close to the relevant code (e.g. `tests/user_management.md`).
+For each feature, create a markdown file in a root `test/` directory (e.g. `test/user_management.md`).
 
 Each file contains multiple test cases. Each test case has:
+
 - A `#` header with a descriptive test case name
 - Steps written in freeform English using Given/When/Then/And keywords
 - Coverage of happy path and obvious error cases (invalid input, duplicates, not found, unauthorized)
