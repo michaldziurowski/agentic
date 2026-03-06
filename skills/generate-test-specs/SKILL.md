@@ -61,9 +61,9 @@ If the grouping is not obvious (e.g. endpoints that could belong to multiple fea
 
 For each feature, create a markdown file in a root `test/` directory (e.g. `test/user_management.md`).
 
-Each file contains multiple test cases. Each test case has:
+Each file starts with a `#` header for the feature name, followed by multiple test cases. Each test case has:
 
-- A `#` header with a descriptive test case name
+- A `##` header with a descriptive test case name
 - Steps written in freeform English using Given/When/Then/And keywords
 - Coverage of happy path and obvious error cases (invalid input, duplicates, not found, unauthorized)
 
@@ -78,7 +78,9 @@ Show the user what files were created and give a brief summary of test coverage 
 Each markdown file follows this structure:
 
 ```markdown
-# Create user successfully
+# User Management
+
+## Create user successfully
 
 Given no users exist
 When I create a user with name "John" and email "john@example.com"
@@ -86,27 +88,27 @@ Then the response status is 201
 And the response contains the user with name "John"
 And the user list contains exactly 1 user
 
-# Create user with missing required fields
+## Create user with missing required fields
 
 When I create a user without a name
 Then the response status is 400
 And the response contains a validation error for the name field
 
-# Create user with duplicate email
+## Create user with duplicate email
 
 Given a user with email "john@example.com" exists
 When I create a user with name "Jane" and email "john@example.com"
 Then the response status is 409
 And the response contains an error indicating the email is already taken
 
-# Get user by ID
+## Get user by ID
 
 Given a user with name "John" exists
 When I get the user by their ID
 Then the response status is 200
 And the response contains the user with name "John"
 
-# Get non-existent user
+## Get non-existent user
 
 When I get a user with a non-existent ID
 Then the response status is 404

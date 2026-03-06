@@ -36,6 +36,11 @@ Scan the project to understand how to interact with the application:
 
 For each `.md` spec file, generate a corresponding `_test.go` file in the same directory.
 
+#### Mapping Markdown to Go
+
+- The `#` header (feature name) becomes the top-level test function: `# User Management` → `func TestUserManagement(t *testing.T)`
+- Each `##` header (test case) becomes a subtest: `## Create user successfully` → `t.Run("Create user successfully", ...)`
+
 #### File Structure
 
 ```go
@@ -54,7 +59,7 @@ func truncateTables(t *testing.T) {
     // Close connection
 }
 
-func TestFeatureName(t *testing.T) {
+func TestUserManagement(t *testing.T) {
     t.Run("Create user successfully", func(t *testing.T) {
         truncateTables(t)
         // Given/When/Then steps translated to Go code
