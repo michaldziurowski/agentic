@@ -1,6 +1,6 @@
 ---
 name: web-app
-description: "Use when building Go web apps. Enforces templ templates, Alpine AJAX, semantic HTML, minimal JavaScript. Triggers: go web, server-side rendering, SSR, fullstack go, templ, alpine."
+description: "Use when building server-rendered Go web apps with SPA-like interactivity. Uses templ templates, Alpine AJAX for partial page updates, semantic HTML, plain CSS, minimal JavaScript. Triggers: go web, server-side rendering, SSR, fullstack go, templ, alpine, alpine-ajax."
 ---
 
 # Web App
@@ -11,15 +11,17 @@ Build server-side rendered web applications with Go, templ, and Alpine AJAX.
 
 These principles shape every decision:
 
-1. **Semantic HTML first** - Use meaningful elements (`<article>`, `<nav>`, `<section>`, `<button>`, `<form>`), not `<div>` soup. HTML communicates structure and meaning.
+1. **SPA experience, SSR architecture** - The app should feel like a single-page application — fast transitions, no full page reloads, seamless interactions — but all rendering happens on the server. Alpine AJAX bridges the gap by replacing page fragments with server-rendered HTML.
 
-2. **CSS only** - Custom CSS with CSS variables for theming. No utility frameworks (Tailwind, Bootstrap). Write purposeful styles that describe what elements *are*, not how they look.
+2. **Semantic HTML first** - Use meaningful elements (`<article>`, `<nav>`, `<section>`, `<button>`, `<form>`), not `<div>` soup. HTML communicates structure and meaning.
 
-3. **No JS frameworks** - Only Alpine.js + Alpine AJAX when absolutely necessary. The server renders HTML; the browser displays it.
+3. **CSS only** - Custom CSS with CSS variables for theming. No utility frameworks (Tailwind, Bootstrap). Write purposeful styles that describe what elements *are*, not how they look.
 
-4. **Alpine.js sparingly** - Only when HTML/CSS cannot achieve the goal. Don't recreate in JavaScript what the platform already provides.
+4. **No JS frameworks** - Only Alpine.js + Alpine AJAX. The server renders HTML; the browser displays it.
 
-5. **Don't fight the browser** - Use native form submission, links, and browser navigation. Enhance progressively, don't replace.
+5. **Alpine.js sparingly** - Only when HTML/CSS cannot achieve the goal. Don't recreate in JavaScript what the platform already provides.
+
+6. **Don't fight the browser** - Use native form submission, links, and browser navigation. Enhance progressively, don't replace.
 
 ## Technology Stack
 
@@ -97,16 +99,18 @@ func main() {
 
 ## Alpine AJAX Integration
 
-Alpine AJAX enables server-driven partial updates without full page reloads.
+Alpine AJAX turns server-rendered pages into an SPA-like experience. Forms submit, content updates, and navigation happen through partial HTML replacement — no full page reloads, no JSON APIs, no client-side rendering. Every interaction that would traditionally require a full page load should use Alpine AJAX instead.
 
 Include via CDN (Alpine AJAX must load before Alpine.js):
 
 ```html
-<script defer src="https://cdn.jsdelivr.net/npm/@imacrayon/alpine-ajax@0.12.6/dist/cdn.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@imacrayon/alpine-ajax@0.12.7/dist/cdn.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
 ```
 
 ### Basic Pattern
+
+Add `x-target` to a form or link. The server response must contain an element with the same `id` — Alpine AJAX finds the match and replaces the target on the page.
 
 ```html
 <form x-target="results" action="/search" method="get">
@@ -114,31 +118,25 @@ Include via CDN (Alpine AJAX must load before Alpine.js):
     <button type="submit">Search</button>
 </form>
 <div id="results">
-    <!-- Server response replaces this content -->
+    <!-- Server response replaces this element -->
 </div>
 ```
 
-### Critical: Server Response Must Include Matching ID
+### Merge Strategies
 
-The server response MUST contain an element with the same `id` that `x-target` points to. Without this, Alpine AJAX cannot perform the replacement.
+By default, `x-target` replaces the entire target element. Use `x-merge` on the **target element** to change this:
 
-```go
-// Response MUST include element with id="results"
-templ SearchResults(results []Result) {
-    <div id="results">
-        // ... content ...
-    </div>
-}
-```
+| `x-merge` on target | Behavior |
+|----------------------|----------|
+| `"replace"` (default) | Replace entire target element |
+| `"update"` | Replace inner HTML only |
+| `"prepend"` | Prepend response content inside target |
+| `"append"` | Append response content inside target |
+| `"before"` | Insert content of response before target |
+| `"after"` | Insert content of response after target |
+| `"morph"` | Morph into response, preserving Alpine state (requires [Alpine Morph Plugin](https://alpinejs.dev/plugins/morph) loaded before Alpine AJAX) |
 
-### Key Attributes
-
-| Attribute | Purpose |
-|-----------|---------|
-| `x-target="id"` | Element ID to replace with response |
-| `x-target.replace` | Replace entire element, not just content |
-| `x-target.append` | Append response to target |
-| `x-target.prepend` | Prepend response to target |
+See @alpine-ajax-patterns.md for complete patterns, events, loading states, and advanced directives.
 
 ## Quality Checklist
 
@@ -152,8 +150,9 @@ Before completing any web app task, verify:
 - [ ] No JavaScript for what HTML/CSS can do
 - [ ] Forms use native validation where possible
 - [ ] Interactive elements are correct (button vs a vs input)
-- [ ] AJAX responses return HTML fragments, not JSON
-- [ ] AJAX responses include element with matching `id` for `x-target`
+- [ ] Page interactions use Alpine AJAX — no full page reloads for navigation, form submissions, or content updates
+- [ ] AJAX responses return HTML fragments with matching `id` for `x-target`, not JSON
+- [ ] `x-merge` is on the target element, not on the form/link
 
 ## Reference Files
 

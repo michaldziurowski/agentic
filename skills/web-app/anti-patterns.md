@@ -179,10 +179,11 @@ function renderUsers(users) {
 }
 </script>
 
-<!-- CORRECT - server returns HTML via Alpine AJAX -->
-<div x-init x-target="users" hx-get="/users">
+<!-- CORRECT - server renders HTML, Alpine AJAX updates it -->
+<div id="users">
     @UserList(users)
 </div>
+<a x-target="users" href="/users">Refresh</a>
 ```
 
 ### Never: JSON APIs for UI Data

@@ -286,8 +286,8 @@ templ Base(title string, currentPath string) {
             <footer>
                 <p>&copy; 2024</p>
             </footer>
-            <script src="/static/js/alpine.min.js" defer></script>
             <script src="/static/js/ajax.min.js" defer></script>
+            <script src="/static/js/alpine.min.js" defer></script>
         </body>
     </html>
 }
@@ -297,26 +297,26 @@ templ Base(title string, currentPath string) {
 
 ### Template
 
+Use `x-merge="append"` on the list so new items are appended. Target both the list and the load-more container so the button updates (or disappears) after each fetch:
+
 ```go
 templ ItemList(items []Item, nextCursor string) {
-    <ul id="items">
+    <ul id="items" x-merge="append">
         for _, item := range items {
             <li>{ item.Name }</li>
         }
-
-        if nextCursor != "" {
-            <li>
-                <button
-                    x-init
-                    x-target.append="items"
-                    hx-get={ "/items?cursor=" + nextCursor }
-                    @ajax:success="$el.remove()"
-                >
-                    Load More
-                </button>
-            </li>
-        }
     </ul>
+    @LoadMoreButton(nextCursor)
+}
+
+templ LoadMoreButton(cursor string) {
+    <div id="load-more">
+        if cursor != "" {
+            <a x-target="items load-more" href={ templ.SafeURL("/items?cursor=" + cursor) }>
+                Load More
+            </a>
+        }
+    </div>
 }
 ```
 
@@ -327,7 +327,25 @@ func (h *Handler) ListItems(w http.ResponseWriter, r *http.Request) {
     cursor := r.URL.Query().Get("cursor")
     items, nextCursor := h.db.GetItems(r.Context(), cursor, 20)
 
+    if isAJAX(r) {
+        // Return just the new items and updated load-more button
+        components.ItemListPartial(items, nextCursor).Render(r.Context(), w)
+        return
+    }
     components.ItemList(items, nextCursor).Render(r.Context(), w)
+}
+```
+
+The partial response includes both `<ul id="items">` (new items appended via `x-merge`) and `<div id="load-more">` (replaced with next cursor or empty):
+
+```go
+templ ItemListPartial(items []Item, nextCursor string) {
+    <ul id="items">
+        for _, item := range items {
+            <li>{ item.Name }</li>
+        }
+    </ul>
+    @LoadMoreButton(nextCursor)
 }
 ```
 
