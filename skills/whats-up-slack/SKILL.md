@@ -29,8 +29,7 @@ Generate a focused summary of what happened in the user's Slack channels and DMs
 
 ## Inputs
 
-The user provides:
-- **Channels**: a list of channel names (e.g., `#backend`, `#incident-response`, `#team-platform`)
+Channels are loaded from `.whats-up-slack.channels` in the current working directory — one channel name per line (without `#` prefix). If the file does not exist, ask the user which channels to monitor and create the file.
 
 The time range is determined automatically — see Step 1.
 
@@ -47,7 +46,9 @@ The time range is determined automatically — see Step 1.
    - `latest` is **now** — compute the current Unix timestamp with `date +%s`.
    - Record these values; you'll need `oldest` and `latest` as Unix timestamps throughout the workflow, and the ISO-8601 forms for display and for the `.idx` file update.
 
-3. Resolve each channel name to a channel ID using `slack_search_channels`. Channel names may or may not include the `#` prefix — handle both.
+3. **Read `.whats-up-slack.channels`** from the current working directory. Each line is a channel name (without `#`). If the file does not exist, ask the user which channels to monitor with `AskUserQuestion`, then create the file with their answer (one channel per line).
+
+4. Resolve each channel name to a channel ID using `slack_search_channels`. Channel names may or may not include the `#` prefix — handle both.
 
 ### Step 2: Read channels
 
@@ -128,7 +129,7 @@ For each message or thread, classify it into one of these categories:
 
 ### Step 6: Write the output file and update the index
 
-1. Write the summary to `whats-up-slack-YYYYMMDDhhmmss.md` in the current working directory, using the compact timestamp of the current run. For example: `whats-up-slack-20260414143022.md`.
+1. Write the summary to `whats-up-slack-YYYYMMDDhhmmss.md` using the compact timestamp of the current run. If an `inbox/` directory exists in the current working directory, write the file there (e.g., `inbox/whats-up-slack-20260414143022.md`). Otherwise, write to the current working directory.
 
 2. **Update `.whats-up-slack.idx`**: write the current ISO-8601 datetime (the `latest` value used for this run) to `.whats-up-slack.idx` in the current working directory, overwriting any previous content. This records the run time so the next invocation picks up where this one left off.
 
