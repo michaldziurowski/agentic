@@ -85,6 +85,20 @@ slack_search_public_and_private(
 
 This catches mentions that `to:me` might miss. Deduplicate results by message timestamp. Discard any results whose timestamp falls outside the exact `oldest`/`latest` range (the date filters are day-granularity, so edge messages may leak in).
 
+**Also search for the user's own posts** — this is a safety net, not a luxury. `slack_read_channel` has been observed returning empty results for a monitored channel even when the user posted in it during the range. A `from:me` search catches those misses, and also surfaces important activity the user initiated in channels that aren't on the monitored list:
+```
+slack_search_public_and_private(
+  query="from:me after:AFTER_DATE before:BEFORE_DATE",
+  sort="timestamp",
+  include_context=true
+)
+```
+Paginate through all pages. For each hit:
+- If the channel is in `.whats-up-slack.channels` but the message wasn't returned by `slack_read_channel` in Step 2, treat it as a channel-read miss — read the surrounding thread with `slack_read_thread` (use `thread_ts` if present, otherwise the message's own `ts`) and fold it into the digest.
+- If the channel is NOT monitored but the user posted something substantive (proposals, decisions, action-item completions, architectural arguments — not just reactions/acks), include it in the digest under the most fitting section. Flag the channel name so the user sees it came from outside the monitored list.
+
+Proposal shares, action-item completions, and position-taking posts by the user belong in **Decisions & outcomes** even though they're the user's own messages — the rule about skipping the user's own messages applies only to the **Action items & mentions** section.
+
 ### Step 4: Read DMs
 
 Search for DM activity in the time range:
