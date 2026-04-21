@@ -63,6 +63,24 @@ If a channel has more than 100 messages, paginate using the `cursor` from the re
 
 For any message that has thread replies (indicated by `reply_count` > 0 or a `thread_ts` field), read the full thread with `slack_read_thread` using `channel_id` and the message's `ts` as `message_ts`, with the same `oldest`/`latest` range and `response_format: "concise"`.
 
+**Reconcile each channel with a search pass.** `slack_read_channel` wraps Slack's `conversations.history`, which only returns top-level messages whose `ts` falls inside the time range. If the only activity in a channel during the range is a reply to an *older* thread (parent `ts` before `oldest`), the channel read returns empty or incomplete — the thread reply is invisible. This happens more often than you'd expect in long-running project channels.
+
+For each monitored channel, run:
+```
+slack_search_public_and_private(
+  query="in:<#CHANNEL_ID> after:AFTER_DATE before:BEFORE_DATE",
+  sort="timestamp",
+  include_context=false
+)
+```
+(where `AFTER_DATE` is the day before `oldest` and `BEFORE_DATE` is the day after `latest`; paginate if needed, and discard results outside the exact `oldest`/`latest` range).
+
+Deduplicate hits by `message_ts` against what `slack_read_channel` already returned. For each remainder:
+- If it has a `thread_ts` different from its own `ts`, it's a thread reply on an older parent — read the thread with `slack_read_thread` using `thread_ts` as `message_ts` (no `oldest`/`latest` so you get the parent for context), and fold the new replies into the digest.
+- Otherwise treat it as a regular missed top-level message and fold it in.
+
+Note: Slack search indexing can lag a few seconds behind `conversations.history`, so a message posted seconds before the run may not appear in search yet. Acceptable — the next run picks it up.
+
 ### Step 3: Search for direct mentions
 
 Search for messages mentioning the user in the time range. Slack search supports `after:` and `before:` date filters (YYYY-MM-DD format). Compute `AFTER_DATE` as the day before `oldest` and `BEFORE_DATE` as the day after `latest` to ensure full coverage:
@@ -85,7 +103,7 @@ slack_search_public_and_private(
 
 This catches mentions that `to:me` might miss. Deduplicate results by message timestamp. Discard any results whose timestamp falls outside the exact `oldest`/`latest` range (the date filters are day-granularity, so edge messages may leak in).
 
-**Also search for the user's own posts** — this is a safety net, not a luxury. `slack_read_channel` has been observed returning empty results for a monitored channel even when the user posted in it during the range. A `from:me` search catches those misses, and also surfaces important activity the user initiated in channels that aren't on the monitored list:
+**Also search for the user's own posts** — this surfaces substantive activity the user initiated in channels that aren't on the monitored list (proposals, decisions, position-taking posts in ad-hoc channels). The per-channel reconciliation pass in Step 2 already handles misses within monitored channels; `from:me` covers the off-list case:
 ```
 slack_search_public_and_private(
   query="from:me after:AFTER_DATE before:BEFORE_DATE",
@@ -93,9 +111,7 @@ slack_search_public_and_private(
   include_context=true
 )
 ```
-Paginate through all pages. For each hit:
-- If the channel is in `.whats-up-slack.channels` but the message wasn't returned by `slack_read_channel` in Step 2, treat it as a channel-read miss — read the surrounding thread with `slack_read_thread` (use `thread_ts` if present, otherwise the message's own `ts`) and fold it into the digest.
-- If the channel is NOT monitored but the user posted something substantive (proposals, decisions, action-item completions, architectural arguments — not just reactions/acks), include it in the digest under the most fitting section. Flag the channel name so the user sees it came from outside the monitored list.
+Paginate through all pages. For each hit in a channel NOT on `.whats-up-slack.channels`: if the user posted something substantive (proposals, decisions, action-item completions, architectural arguments — not just reactions/acks), include it in the digest under the most fitting section. Flag the channel name so the user sees it came from outside the monitored list. Skip hits in monitored channels (already reconciled in Step 2) and skip chatter/acks.
 
 Proposal shares, action-item completions, and position-taking posts by the user belong in **Decisions & outcomes** even though they're the user's own messages — the rule about skipping the user's own messages applies only to the **Action items & mentions** section.
 
