@@ -113,7 +113,7 @@ slack_search_public_and_private(
 ```
 Paginate through all pages. For each hit in a channel NOT on `.whats-up-slack.channels`: if the user posted something substantive (proposals, decisions, action-item completions, architectural arguments — not just reactions/acks), include it in the digest under the most fitting section. Flag the channel name so the user sees it came from outside the monitored list. Skip hits in monitored channels (already reconciled in Step 2) and skip chatter/acks.
 
-Proposal shares, action-item completions, and position-taking posts by the user belong in **Decisions & outcomes** even though they're the user's own messages — the rule about skipping the user's own messages applies only to the **Action items & mentions** section.
+Proposal shares and position-taking posts by the user belong in **Decisions & outcomes** even though they're the user's own messages. Action-item completions by the user belong in **Action items & mentions → Your commitments** with a `[DONE]` tag. The rule about skipping the user's own messages applies only to the **Needs response** and **FYI** subsections.
 
 ### Step 4: Read DMs
 
@@ -137,11 +137,17 @@ Process all collected messages and produce the digest. Use parallel Agent subage
 For each message or thread, classify it into one of these categories:
 
 1. **Decisions & outcomes** — statements like "we decided to...", "going with...", "approved", "merged", conclusions of discussions, agreed-upon plans. This is the highest-signal category — a missed decision can cause wasted work. Include the user's own decisions too — they belong in the record.
+   - **Pair user proposals with stakeholder approvals.** When the user posted a proposal/question, scan the same thread for replies from decision-makers. Even one-line approvals ("yes ok with me", "approved", "go ahead") belong in the same bullet as the proposal — they're what unblocks the work. Summarising the proposal alone, while a sign-off sits in the thread, misrepresents the state of play.
 
-2. **Action items & mentions** — messages where the user was @mentioned or asked to do something by someone else. Split into:
-   - **Needs response** — questions directed at the user, review requests, explicit asks
+2. **Action items & mentions** — work owed by or to the user. Split into three subsections:
+   - **Needs response** — questions directed at the user, review requests, explicit asks from someone else
+   - **Your commitments** — things the user said they would do in their own messages ("I'll fix it", "let me look into Z", "I'll send the doc by Friday", "I'll dig in tomorrow"). Tag each as `[OPEN]` if not completed within the digest range, or `[DONE]` if completed within the range (look for a follow-up message from the user reporting completion, or for an artifact like a merged PR / shared doc tied to the commitment). Surface these even when the user wasn't @mentioned — they're action items regardless.
    - **FYI** — informational mentions, CC-style tags, notifications
-   - Skip the user's own messages in this section only — the user doesn't need to action themselves.
+   - For **Needs response** and **FYI**, skip the user's own messages — only items from other people belong there. **Your commitments** is the place for the user's own action items.
+
+   **Before flagging as Needs response, verify the ask is still open and actually for the user:**
+   - **Read the rest of the thread.** If someone else already answered or handled the ask (often within minutes), it is resolved — drop it, or move to FYI if the resolution is itself worth knowing.
+   - **Parse the addressee.** A message that opens with "Hi <name>," or directly @mentions a specific person is addressed to *that* person, even if it lands in a channel the user monitors. Only flag as Needs response when the addressee is the user, or the message has no specific addressee and asks the channel at large for input. A substantive doc shared in the channel is not automatically a Needs-response item for the user.
 
 3. **Blockers & incidents** — messages about outages, broken builds, blocked PRs, dependency issues, production alerts. Note whether the status is **open** or **resolved** by the end of the range. Include blockers the user raised too.
 
@@ -150,6 +156,7 @@ For each message or thread, classify it into one of these categories:
 5. **Active discussions** — threads with 5+ replies that the user did NOT participate in. These might need the user's attention or awareness.
 
 6. **Open questions** — questions posted in channels that received no answer by the end of the range, where the user might have relevant context.
+   - **Check the user's own replies before declaring a question open.** Read the full thread, including any reply from the user (also surfaced via `from:me`). If the user's reply addressed or redirected part of the question — e.g., pointing to another decision thread — note that explicitly: mark addressed parts as resolved with a one-line "you replied: …" and only list the parts that are still actually open. A multi-part question is rarely all-open or all-closed.
 
 #### What to exclude
 
@@ -178,6 +185,11 @@ Items that need the user's response come first, marked with a warning indicator.
 
 - **#channel-name** — [Brief description of what's needed]. [Thread link]
 - **DM from @person** — [Brief description]. [Thread link]
+
+### Your commitments
+
+- **#channel-name** — [OPEN] [What the user said they'd do]. [Thread link]
+- **#channel-name** — [DONE] [What the user committed to and shipped within the range]. [Thread link]
 
 ### FYI
 
@@ -212,5 +224,6 @@ Items that need the user's response come first, marked with a warning indicator.
 - Bold the channel name or DM source at the start of each bullet
 - Include a Slack deep link to the original message or thread when available (format: `https://WORKSPACE.slack.com/archives/CHANNEL_ID/pTIMESTAMP`)
 - The `[!]` marker on "Needs response" items helps the user scan for urgent items
-- Use `[OPEN]` and `[RESOLVED]` tags on blockers/incidents
-- When mentioning people, use their display names, not Slack user IDs
+- Use `[OPEN]` / `[RESOLVED]` tags on **Blockers & incidents** items, and `[OPEN]` / `[DONE]` tags on **Your commitments** items
+- When mentioning people, use their **full display name on every reference within a bullet** — never drop to first-name-only later in the same paragraph. The team has multiple Łukaszes, Bartoszes, Michałs, etc., and downstream consumers (e.g., wikilink resolution against `resources/people/`) need unambiguous identifiers
+- **Per-bullet event date.** When the digest range spans 2+ calendar days, prefix each bullet's content (after the bolded channel and any `[OPEN]`/`[DONE]`/`[!]` tag) with `(YYYY-MM-DD)` indicating when the event happened. For thread items, use the date of the most recent activity within the range. For single-day digests (range start and end fall on the same calendar day), omit the prefix
