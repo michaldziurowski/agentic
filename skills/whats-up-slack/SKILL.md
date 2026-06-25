@@ -3,9 +3,9 @@ name: whats-up-slack
 description: |
   Catch up on Slack activity since the last run and route the content directly into the vault —
   no intermediate digest file. Reads channels, threads, and DMs since the last run; classifies
-  each item by content (decision, action item, blocker, etc.) to the right project's log.md, or
+  each item by content (decision, action item, blocker, etc.) to the right initiative's or service's log.md, or
   to a per-action file in actions/. Routing is content-based, with a soft prior from the
-  channel's owning project. Surfaces low-confidence
+  channel's owning entity. Surfaces low-confidence
   items in terminal output without writing them. Must be invoked from the vault root. Tracks last
   run time in .whats-up-slack.idx; if no prior run exists, asks the user for a start date.
   Use this skill whenever the user asks for a Slack summary, daily digest, catch-up on Slack,
@@ -28,12 +28,12 @@ allowed-tools:
 
 # What's Up Slack — Route Slack Into Your Vault
 
-Catch up on Slack activity since the last run and route the content directly into the vault. Action items become individual files in `actions/` (one per action, status in frontmatter). Decisions, blockers, announcements, FYIs, active discussions, and open questions land in `projects/<project>/log.md` for the project they belong to — decided primarily by content, with a soft prior from the channel's owning project. Items the skill cannot confidently route surface in terminal output for manual handling. No intermediate digest file is produced.
+Catch up on Slack activity since the last run and route the content directly into the vault. Action items become individual files in `actions/` (one per action, status in frontmatter). Decisions, blockers, announcements, FYIs, active discussions, and open questions land in the owning entity's `log.md` — an initiative (`projects/<p>/`) or a service (`services/<s>/`) — decided primarily by content, with a soft prior from the channel's owning entity. Items the skill cannot confidently route surface in terminal output for manual handling. No intermediate digest file is produced.
 
 ## Prerequisites
 
-- **Invoke from vault root.** The skill writes to `actions/` and `projects/<project>/log.md` paths relative to CWD. It refuses to run if `CWD/projects/` is missing; `actions/` is created on demand.
-- **Channels come from `.slack` files** (one channel name per line, no `#` prefix): `projects/<p>/.slack` per project, plus a root `.slack` for general/cross-cutting channels. The monitored set is the union of all active-project files plus root, deduped (`archive/` is never read). Channels say *where to look*; a channel listed in exactly one project's `.slack` is a soft routing prior toward that project — content still decides *where to file*.
+- **Invoke from vault root.** The skill writes to `actions/`, `projects/<project>/log.md`, and `services/<service>/log.md` paths relative to CWD. It refuses to run if `CWD/projects/` is missing; `actions/` is created on demand.
+- **Channels come from `.slack` files** (one channel name per line, no `#` prefix): `projects/<p>/.slack` per initiative and `services/<s>/.slack` per service (services often have none), plus a root `.slack` for general/cross-cutting channels. The monitored set is the union of all active-project, active-service, and root files, deduped (`archive/` is never read). Channels say *where to look*; a channel listed in exactly one entity's `.slack` is a soft routing prior toward that entity — content still decides *where to file*. A service is a valid routing target even with no channel of its own.
 - `.whats-up-slack.idx` in CWD — ISO-8601 datetime of last run. Created on first successful run.
 
 ## Workflow
@@ -49,11 +49,11 @@ Catch up on Slack activity since the last run and route the content directly int
    - If absent, ask via `AskUserQuestion`: *"No previous run recorded. Since when should I summarize? (e.g., 2026-04-11, yesterday, last Monday)"*. Parse the answer to ISO-8601.
    - `latest` = now. Get Unix via `date +%s` and ISO via `date -u +"%Y-%m-%dT%H:%M:%SZ"`.
 
-4. **Assemble channels.** Glob `projects/*/.slack` (active projects only — never `archive/`) and the root `.slack`. Union all listed channel names and dedup. For each channel, compute its `owning_project`: the project whose `.slack` lists it, **iff exactly one** project does; if zero list it (root/general) or two-plus do (shared), it has no owner. Carry the `{channel → owning_project}` map into Step 5. If no `.slack` files exist anywhere, ask which channels to monitor and create a root `.slack`.
+4. **Assemble channels.** Glob `projects/*/.slack` and `services/*/.slack` (active only — never `archive/`) and the root `.slack`. Union all listed channel names and dedup. For each channel, compute its `owning_entity` (an initiative or service): the entity whose `.slack` lists it, **iff exactly one** does; if zero list it (root/general) or two-plus do (shared), it has no owner. Carry the `{channel → owning_entity}` map into Step 5. If no `.slack` files exist anywhere, ask which channels to monitor and create a root `.slack`.
 
 5. **Resolve channel IDs.** Use `slack_search_channels` for each channel name. Tolerate optional `#` prefix.
 
-6. **Load project context.** Enumerate `projects/*/` in CWD. For each project directory:
+6. **Load entity context.** Enumerate `projects/*/` and `services/*/` in CWD. For each entity directory (initiative or service):
    - Read `README.md` in full.
    - Read the first ~20 lines of `log.md` (reverse-chronological — this is recent activity). Skip if `log.md` does not exist yet.
    - Build an in-memory map `{project_slug → {readme, recent_log}}`. This is the corpus Step 5 scores items against.
@@ -170,13 +170,15 @@ For each item, score against the project context map from Step 1.6. Signals to w
 - **People mentioned** — some people are tightly bound to specific projects (visible in `log.md` history).
 - **Recent thread continuity** — if a project's recent `log.md` covers topic X and a new message extends X, that's a strong signal even without keyword overlap.
 - **Explicit references** — `[[project/README|project]]` wikilinks, PR numbers, project slug mentions.
-- **Channel ownership (soft prior)** — if the item's source channel has an `owning_project` (from Step 1.4), treat it as a strong prior toward that project. Absent a contradicting content signal, an item from an owned channel is `clear:<owning_project>`. Strong content pointing elsewhere overrides the prior; weak or conflicting signal makes it `ambiguous:<owning_project>,<content_project>`. Channels with no owner (root/general, or shared across projects) contribute no prior. Items from unmonitored channels — your own posts/DMs in Steps 3–4 — also have no owner.
+- **Channel ownership (soft prior)** — if the item's source channel has an `owning_entity` (from Step 1.4), treat it as a strong prior toward that entity. Absent a contradicting content signal, an item from an owned channel is `clear:<owning_entity>`. Strong content pointing elsewhere overrides the prior; weak or conflicting signal makes it `ambiguous:<owning_entity>,<content_entity>`. Channels with no owner (root/general, or shared across entities) contribute no prior. Items from unmonitored channels — your own posts/DMs in Steps 3–4 — also have no owner.
+
+**Initiative vs. service.** A routing target is an **initiative** (`projects/`) or a **service** (`services/`). When an item could belong to a service *and* its consuming initiative (e.g. a credit-ledger design decision posted in `brainly-unlimited-dev`), apply the **durability test**: *would this still be true / still matter if the driving initiative were cancelled?* Yes → the service (`credits`/`entitlements`); No → the initiative. A service is a valid `clear:` target even when it owns no channel — content routes there on durability alone. On a genuine coin-flip between a service and its initiative, **default to the initiative** (reserve `ambiguous:` for when both score on real content signal, not merely because they're related). A tangled item **splits**: the durable design point files under the service, the experiment-specific point under the initiative, each as its own entry.
 
 Output one of:
 
-- **`clear:<project>`** — strong single-project match. Will be written directly.
+- **`clear:<entity>`** — strong single-entity match. Will be written directly.
 - **`ambiguous:<a>,<b>[,<c>]`** — two or three plausible matches with similar score. Queues for user confirmation in Step 6.
-- **`none`** — no project scores meaningfully. Queues for unrouted terminal output.
+- **`none`** — no entity scores meaningfully. Queues for unrouted terminal output.
 
 Lean cautious — when in doubt between "clear" and "ambiguous", choose ambiguous. When in doubt between "ambiguous" and "none", choose none. Mis-routes are worse than unrouted items because there's no inbox to catch them.
 
@@ -194,7 +196,7 @@ Process in this order:
 
 1. **Write clear matches.**
 
-   For each `clear:<project>` item, route by type:
+   For each `clear:<entity>` item, route by type:
    - **Needs response** and **[OPEN] commitments** → new action file, `status: now`.
    - **Waiting on** → new action file, `status: waiting`.
    - **[DONE] commitments** → `log.md` (no action file; the action is complete).
@@ -203,10 +205,10 @@ Process in this order:
    **Writing an action file (`actions/`):**
    - **Dedup first**: scan the `source:` frontmatter of every `actions/*.md` for this Slack permalink. If any file already carries it, skip — the action exists.
    - Filename: `YYYY-MM-DD-<kebab-slug>.md`, date = source message date, slug = a distinctive 3–6 word kebab summary. If that filename already exists, suffix `-2`, `-3`, etc.
-   - Frontmatter: `status` (`now` or `waiting` — never `next`/`done`/`dropped`), `project: "[[<project>/README|<project>]]"`, `created: <source date>`, `source: <slack permalink>`. Add `waiting_on: "[[person]]"` when status is `waiting` and the blocker is a known person.
+   - Frontmatter: `status` (`now` or `waiting` — never `next`/`done`/`dropped`), `project: "[[<entity>/README|<entity>]]"` (the owning initiative or service), `created: <source date>`, `source: <slack permalink>`. Add `waiting_on: "[[person]]"` when status is `waiting` and the blocker is a known person.
    - Body: a one-line description of the action with `[[people]]` wikilinks, then a `## Log` section seeded with one entry — `- <source date> — <where it came from, e.g. #channel or DM>`.
 
-   **Writing to `projects/<project>/log.md`:**
+   **Writing to the owning entity's `log.md` (`projects/<p>/log.md` or `services/<s>/log.md`):**
    - If `log.md` does not exist for the project, create it with the new dated block as its only content.
    - Otherwise prepend a `## YYYY-MM-DD` block at the top of the file (after a title line if one exists, otherwise as the first content), containing all entries for that project from this run.
    - **Same-day merge**: if the topmost header is already today's `## YYYY-MM-DD`, append the new entries within that block instead of creating a duplicate.
