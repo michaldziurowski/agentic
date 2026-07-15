@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Claude Code status line — single line:
-#   <path relative to $HOME> · <git branch> · 🧠 <context used%> · 💰 <cost>
-#   · <tokens>/<window> · 5h <bar> <usage%> · 7d <bar> <usage%>
+#   <path relative to $HOME> · <git branch> · 🧠 <tokens>/<window> · 💰 <cost>
+#   · 5h <bar> <usage%> · 7d <bar> <usage%>
 # Reads the session JSON from stdin (schema: https://code.claude.com/docs/en/statusline).
 
 input=$(cat)
@@ -77,9 +77,8 @@ usage_seg() {
 SEP="${DIM} · ${RESET}"
 line="${CYAN}${REL}${RESET}"
 [ -n "$BRANCH" ] && line+="${SEP}${GREEN}${BRANCH}${RESET}"
-line+="${SEP}🧠 $(pct_color "$PCT_INT")${PCT_INT}%${RESET}"
+line+="${SEP}🧠 $(pct_color "$PCT_INT")$(human "$USED")/$(human "$WIN")${RESET}"
 line+="${SEP}💰 ${YELLOW}${COST_FMT}${RESET}"
-line+="${SEP}${DIM}$(human "$USED")/$(human "$WIN")${RESET}"
 
 usage=""
 [ "$FIVEH_INT" -ge 0 ] && usage+="$(usage_seg 5h "$FIVEH_INT")"
