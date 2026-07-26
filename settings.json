@@ -3,10 +3,6 @@
     "type": "command",
     "command": "~/.claude/file-suggestion.sh"
   },
-  "statusLine": {
-    "type": "command",
-    "command": "~/.claude/statusline.sh"
-  },
   "attribution": {
     "commit": "",
     "pr": ""
@@ -82,10 +78,15 @@
       "Bash(gh repo delete:*)"
     ]
   },
+  "model": "opus",
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/statusline.sh"
+  },
   "enabledPlugins": {
     "skill-creator@claude-plugins-official": true
   },
-  "effortLevel": "high",
+  "effortLevel": "xhigh",
   "skipDangerousModePermissionPrompt": true,
   "voiceEnabled": true
 }
