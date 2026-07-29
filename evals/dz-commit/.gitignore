@@ -1,0 +1,8 @@
+# Generated fixture repos — rebuild with fixtures/make_fixtures.sh
+fixtures/templates/
+
+# Sweep output: run dirs contain nested git repos and are reproducible
+run-*/
+iteration-*/
+
+__pycache__/

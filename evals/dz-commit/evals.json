@@ -1,0 +1,54 @@
+{
+  "skill_name": "dz-commit",
+  "evals": [
+    {
+      "id": 0,
+      "name": "mixed-concerns",
+      "template": "mixed-concerns",
+      "prompt": "commit my changes",
+      "expected_output": "Three atomic commits from a working tree holding three unrelated concerns: the CSV export feature (internal/export/csv.go + its cmd/root.go wiring), the rows.Err() bug fix in internal/store/store.go, and the README typo fix. Subjects in the repo's lowercase plain-prose house style, at least one body explaining why.",
+      "expectations": [
+        "Splits the work into at least 3 commits rather than one lump",
+        "The README typo fix is isolated in a commit that touches nothing else",
+        "The store.go bug fix is not mixed into the CSV export feature commit",
+        "The new export package and the cmd/root.go call site that uses it land in the same commit",
+        "Commit subjects follow the repo's lowercase plain-prose style, not Conventional Commits",
+        "At least one commit body explains why the change was made, not just what changed",
+        "All commit subjects are 72 characters or fewer",
+        "No Co-Authored-By or tool-attribution trailer was added",
+        "Working tree is clean afterwards"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "two-in-one-file",
+      "template": "two-in-one-file",
+      "prompt": "can you commit this for me? i think there might be a couple of separate things mixed into that file",
+      "expected_output": "Two commits carved out of a single modified file, the DEFAULT_TIMEOUT bump and the output_dir expanduser fix, each isolated from the other.",
+      "expectations": [
+        "Splits the single modified file into exactly 2 commits",
+        "The timeout bump and the expanduser fix are in different commits",
+        "Neither commit's diff carries the other commit's change",
+        "At least one commit body explains why the change was made, not just what changed",
+        "All commit subjects are 72 characters or fewer",
+        "No Co-Authored-By or tool-attribution trailer was added",
+        "Working tree is clean afterwards"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "single-change-conventional",
+      "template": "single-change-conventional",
+      "prompt": "commit this",
+      "expected_output": "Exactly one commit, since the change is coherent and should not be split, with implementation and test together and a subject matching the repo's Conventional Commits house style.",
+      "expectations": [
+        "Does not over-split: exactly one commit for one coherent change",
+        "Implementation and its test are committed together",
+        "Subject matches the repo's Conventional Commits house style",
+        "All commit subjects are 72 characters or fewer",
+        "No Co-Authored-By or tool-attribution trailer was added",
+        "Working tree is clean afterwards"
+      ]
+    }
+  ]
+}

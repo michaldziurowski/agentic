@@ -1,0 +1,402 @@
+{
+  "metadata": {
+    "skill_name": "dz-commit",
+    "skill_path": "/home/michal/devel/agentic/skills/dz-commit",
+    "executor_model": "claude-opus-5 (max effort)",
+    "analyzer_model": "<model-name>",
+    "timestamp": "2026-07-29T17:31:52Z",
+    "evals_run": [
+      "mixed-concerns",
+      "two-in-one-file",
+      "single-change-conventional"
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 0,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 9,
+        "failed": 0,
+        "total": 9,
+        "time_seconds": 144.5,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Splits the work into at least 3 commits rather than one lump",
+          "passed": true,
+          "evidence": "3 commits: ['store: report row iteration errors from list', 'export: render entries as csv', 'readme: fix \"databse\" typo']"
+        },
+        {
+          "text": "The README typo fix is isolated in a commit that touches nothing else",
+          "passed": true,
+          "evidence": "README-only commits: ['49498e83']"
+        },
+        {
+          "text": "The store.go bug fix is not mixed into the CSV export feature commit",
+          "passed": true,
+          "evidence": "store.go and export/csv.go never share a commit"
+        },
+        {
+          "text": "The new export package and the cmd/root.go call site that uses it land in the same commit",
+          "passed": true,
+          "evidence": "together in ['5ec31368']"
+        },
+        {
+          "text": "Commit subjects follow the repo's lowercase plain-prose style, not Conventional Commits",
+          "passed": true,
+          "evidence": "all subjects lowercase plain prose"
+        },
+        {
+          "text": "At least one commit body explains why the change was made, not just what changed",
+          "passed": true,
+          "evidence": "2/3 commits have a body of >=30 chars; e.g. f4fa5c9e: 'rows.Next() returns false both at a clean end of the result set and when\\niteration fails part way through. List only che'"
+        },
+        {
+          "text": "All commit subjects are 72 characters or fewer",
+          "passed": true,
+          "evidence": "all subjects within 72 chars"
+        },
+        {
+          "text": "No Co-Authored-By or tool-attribution trailer was added",
+          "passed": true,
+          "evidence": "no trailers found"
+        },
+        {
+          "text": "Working tree is clean afterwards",
+          "passed": true,
+          "evidence": "git status --porcelain is empty"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 7,
+        "failed": 0,
+        "total": 7,
+        "time_seconds": 122.4,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Splits the single modified file into exactly 2 commits",
+          "passed": true,
+          "evidence": "2 commits: ['Raise default timeout from 30s to 120s', \"Expand '~' in the configured output directory\"]"
+        },
+        {
+          "text": "The timeout bump and the expanduser fix are in different commits",
+          "passed": true,
+          "evidence": "timeout in ['fac48706'], expanduser in ['17d1338e']"
+        },
+        {
+          "text": "Neither commit's diff carries the other commit's change",
+          "passed": true,
+          "evidence": "each commit's diff contains only its own change"
+        },
+        {
+          "text": "At least one commit body explains why the change was made, not just what changed",
+          "passed": true,
+          "evidence": "2/2 commits have a body of >=30 chars; e.g. fac48706: 'DEFAULT_TIMEOUT is the fallback Config.timeout() returns when a config\\nfile leaves \"timeout\" unset. 30s is too tight for'"
+        },
+        {
+          "text": "All commit subjects are 72 characters or fewer",
+          "passed": true,
+          "evidence": "all subjects within 72 chars"
+        },
+        {
+          "text": "No Co-Authored-By or tool-attribution trailer was added",
+          "passed": true,
+          "evidence": "no trailers found"
+        },
+        {
+          "text": "Working tree is clean afterwards",
+          "passed": true,
+          "evidence": "git status --porcelain is empty"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 96.9,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Does not over-split: exactly one commit for one coherent change",
+          "passed": true,
+          "evidence": "1 commits: ['feat(api): add batch currency conversion helper']"
+        },
+        {
+          "text": "Implementation and its test are committed together",
+          "passed": true,
+          "evidence": "together in ['643684a4']"
+        },
+        {
+          "text": "Subject matches the repo's Conventional Commits house style",
+          "passed": true,
+          "evidence": "1/1 subjects match feat|fix|docs(scope): \u2014 ['feat(api): add batch currency conversion helper']"
+        },
+        {
+          "text": "All commit subjects are 72 characters or fewer",
+          "passed": true,
+          "evidence": "all subjects within 72 chars"
+        },
+        {
+          "text": "No Co-Authored-By or tool-attribution trailer was added",
+          "passed": true,
+          "evidence": "no trailers found"
+        },
+        {
+          "text": "Working tree is clean afterwards",
+          "passed": true,
+          "evidence": "git status --porcelain is empty"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 0,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 9,
+        "failed": 0,
+        "total": 9,
+        "time_seconds": 75.2,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Splits the work into at least 3 commits rather than one lump",
+          "passed": true,
+          "evidence": "3 commits: ['store: check rows.Err() after iterating in List', 'export: add csv export and wire up the export subcommand', 'readme: fix typo in storage location wording']"
+        },
+        {
+          "text": "The README typo fix is isolated in a commit that touches nothing else",
+          "passed": true,
+          "evidence": "README-only commits: ['419558f4']"
+        },
+        {
+          "text": "The store.go bug fix is not mixed into the CSV export feature commit",
+          "passed": true,
+          "evidence": "store.go and export/csv.go never share a commit"
+        },
+        {
+          "text": "The new export package and the cmd/root.go call site that uses it land in the same commit",
+          "passed": true,
+          "evidence": "together in ['a63a0434']"
+        },
+        {
+          "text": "Commit subjects follow the repo's lowercase plain-prose style, not Conventional Commits",
+          "passed": true,
+          "evidence": "all subjects lowercase plain prose"
+        },
+        {
+          "text": "At least one commit body explains why the change was made, not just what changed",
+          "passed": true,
+          "evidence": "2/3 commits have a body of >=30 chars; e.g. fa96d984: 'A row iteration that ends early because of a driver or scan error leaves\\nrows.Next() returning false without any error s'"
+        },
+        {
+          "text": "All commit subjects are 72 characters or fewer",
+          "passed": true,
+          "evidence": "all subjects within 72 chars"
+        },
+        {
+          "text": "No Co-Authored-By or tool-attribution trailer was added",
+          "passed": true,
+          "evidence": "no trailers found"
+        },
+        {
+          "text": "Working tree is clean afterwards",
+          "passed": true,
+          "evidence": "git status --porcelain is empty"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 7,
+        "failed": 0,
+        "total": 7,
+        "time_seconds": 126.8,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Splits the single modified file into exactly 2 commits",
+          "passed": true,
+          "evidence": "2 commits: ['expand ~ in configured output_dir', 'raise default timeout from 30s to 120s']"
+        },
+        {
+          "text": "The timeout bump and the expanduser fix are in different commits",
+          "passed": true,
+          "evidence": "timeout in ['11776f25'], expanduser in ['145d7451']"
+        },
+        {
+          "text": "Neither commit's diff carries the other commit's change",
+          "passed": true,
+          "evidence": "each commit's diff contains only its own change"
+        },
+        {
+          "text": "At least one commit body explains why the change was made, not just what changed",
+          "passed": true,
+          "evidence": "2/2 commits have a body of >=30 chars; e.g. 145d7451: 'output_dir() returned the config value verbatim, so a path such as\\n\"~/reports\" was treated as a literal directory named '"
+        },
+        {
+          "text": "All commit subjects are 72 characters or fewer",
+          "passed": true,
+          "evidence": "all subjects within 72 chars"
+        },
+        {
+          "text": "No Co-Authored-By or tool-attribution trailer was added",
+          "passed": true,
+          "evidence": "no trailers found"
+        },
+        {
+          "text": "Working tree is clean afterwards",
+          "passed": true,
+          "evidence": "git status --porcelain is empty"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 72.2,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Does not over-split: exactly one commit for one coherent change",
+          "passed": true,
+          "evidence": "1 commits: ['feat(api): add batch currency conversion helper']"
+        },
+        {
+          "text": "Implementation and its test are committed together",
+          "passed": true,
+          "evidence": "together in ['9c6f15fa']"
+        },
+        {
+          "text": "Subject matches the repo's Conventional Commits house style",
+          "passed": true,
+          "evidence": "1/1 subjects match feat|fix|docs(scope): \u2014 ['feat(api): add batch currency conversion helper']"
+        },
+        {
+          "text": "All commit subjects are 72 characters or fewer",
+          "passed": true,
+          "evidence": "all subjects within 72 chars"
+        },
+        {
+          "text": "No Co-Authored-By or tool-attribution trailer was added",
+          "passed": true,
+          "evidence": "no trailers found"
+        },
+        {
+          "text": "Working tree is clean afterwards",
+          "passed": true,
+          "evidence": "git status --porcelain is empty"
+        }
+      ],
+      "notes": []
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1.0,
+        "stddev": 0.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 121.2667,
+        "stddev": 23.8202,
+        "min": 96.9,
+        "max": 144.5
+      },
+      "tokens": {
+        "mean": 0.0,
+        "stddev": 0.0,
+        "min": 0,
+        "max": 0
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 1.0,
+        "stddev": 0.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 91.4,
+        "stddev": 30.694,
+        "min": 72.2,
+        "max": 126.8
+      },
+      "tokens": {
+        "mean": 0.0,
+        "stddev": 0.0,
+        "min": 0,
+        "max": 0
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.00",
+      "time_seconds": "+29.9",
+      "tokens": "+0"
+    }
+  },
+  "notes": [
+    "NON-DISCRIMINATING BENCHMARK: all 22 assertions pass in both configurations (100% vs 100%, delta +0.00). Opus 5 at max effort already splits, orders and messages commits competently without the skill, so these assertions measure floor behaviour the model clears unaided. They validate the skill does no harm; they do not measure its value.",
+    "The real differences are qualitative and live in message CONTENT, not commit structure. Commit grouping was identical across configurations in all three evals (3 / 2 / 1 commits, same file groupings).",
+    "eval-0 (mixed-concerns): with_skill bodies open with the status quo before describing the change \u2014 the article's 'Context' question. The export commit body starts \"`tracker list` is the only way to get entries out, and it prints a human-readable table that is awkward to load into a spreadsheet\". The baseline's body for the same commit is implementation-only: \"Adds internal/export.CSV, which writes entries as comma separated values...\" \u2014 it restates the diff without saying why.",
+    "eval-2 (single-change): both runs silently discovered the same latent defect (the appended test called convertAll but the file's require() did not import it) and both fixed it. with_skill documented the fix in the commit body; the baseline shipped a subject-only message, leaving an unrelated-looking edit unexplained for a reviewer.",
+    "POSSIBLE REGRESSION \u2014 eval-1: with_skill capitalised its subjects (\"Raise default timeout from 30s to 120s\") while the baseline stayed lowercase (\"raise default timeout from 30s to 120s\"). That fixture's history is lowercase. The skill's worked example is capitalised (the article's \"Add '--gray' option alias\"), which may be overriding the 'match house style' instruction given earlier in the skill.",
+    "COST: with_skill is meaningfully slower and more expensive for no assertion gain \u2014 121.3s vs 91.4s mean (+33%) and 29,336 vs 25,040 tokens (+17%). The extra spend buys richer message bodies; whether that trade is worth it is the user's call.",
+    "EVAL DEFECT to fix before iteration 2: the eval-2 fixture shipped a broken test import, so both runs spent effort on an incidental repair unrelated to what the eval was testing (over-splitting and house style).",
+    "n=1 per configuration. Differences of this size are suggestive, not statistically established."
+  ]
+}
