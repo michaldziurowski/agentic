@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 # Claude Code status line — single line:
-#   <path relative to $HOME> · <git branch> · 🧠 <tokens>/<window> · 💰 <cost>
-#   · 5h <bar> <usage%> · 7d <bar> <usage%>
+#   <path relative to $HOME> · <git branch> · 🤖 <model> (<effort>)
+#   · 🧠 <tokens>/<window> · 💰 <cost> · 5h <bar> <usage%> · 7d <bar> <usage%>
 # Reads the session JSON from stdin (schema: https://code.claude.com/docs/en/statusline).
 
 input=$(cat)
 
 # Pull everything jq can give us in one pass (tab-separated). -1 marks absent
 # rate-limit windows (only populated for Claude.ai Pro/Max after the first response).
-IFS=$'\t' read -r DIR PCT COST USED WIN FIVEH SEVEND < <(
+# Text fields get "-" rather than "" because `read` with a tab IFS collapses runs
+# of tabs, so an empty middle field would shift every value after it.
+IFS=$'\t' read -r DIR PCT COST USED WIN FIVEH SEVEND MODEL EFFORT < <(
   jq -r '[
     (.workspace.current_dir // .cwd // ""),
     (.context_window.used_percentage // 0),
@@ -16,9 +18,13 @@ IFS=$'\t' read -r DIR PCT COST USED WIN FIVEH SEVEND < <(
     (.context_window.total_input_tokens // 0),
     (.context_window.context_window_size // 200000),
     (.rate_limits.five_hour.used_percentage // -1),
-    (.rate_limits.seven_day.used_percentage // -1)
+    (.rate_limits.seven_day.used_percentage // -1),
+    (.model.display_name // "-"),
+    (.effort.level // "-")
   ] | @tsv' <<<"$input"
 )
+[ "$MODEL" = "-" ] && MODEL=""
+[ "$EFFORT" = "-" ] && EFFORT=""
 
 # Path relative to $HOME.
 case "$DIR" in
@@ -48,7 +54,7 @@ human() {
 # Colors via ANSI-C quoting so plain `echo` emits them literally and never
 # reinterprets backslashes/percent signs that might appear in paths.
 DIM=$'\033[2m'; CYAN=$'\033[36m'; GREEN=$'\033[32m'
-YELLOW=$'\033[33m'; RED=$'\033[31m'; RESET=$'\033[0m'
+YELLOW=$'\033[33m'; RED=$'\033[31m'; MAGENTA=$'\033[35m'; RESET=$'\033[0m'
 
 # Threshold color for a usage percentage: green < 70, yellow 70–89, red >= 90.
 pct_color() {
@@ -77,6 +83,10 @@ usage_seg() {
 SEP="${DIM} · ${RESET}"
 line="${CYAN}${REL}${RESET}"
 [ -n "$BRANCH" ] && line+="${SEP}${GREEN}${BRANCH}${RESET}"
+if [ -n "$MODEL" ]; then
+  line+="${SEP}🤖 ${MAGENTA}${MODEL}${RESET}"
+  [ -n "$EFFORT" ] && line+=" ${DIM}(${EFFORT})${RESET}"
+fi
 line+="${SEP}🧠 $(pct_color "$PCT_INT")$(human "$USED")/$(human "$WIN")${RESET}"
 line+="${SEP}💰 ${YELLOW}${COST_FMT}${RESET}"
 
