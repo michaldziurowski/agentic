@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Symlinks this repository's Claude Code configuration into ~/.claude.
+# Symlinks this repository's Claude Code and Codex configuration into place.
 set -euo pipefail
 
 if ! command -v jq >/dev/null; then
@@ -9,7 +9,8 @@ fi
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
-SELF="$REPO_DIR/$(basename "${BASH_SOURCE[0]}")"
+CODEX_DIR="${CODEX_HOME:-$HOME/.codex}"
+CODEX_SKILLS_DIR="${CODEX_SKILLS_DIR:-$HOME/.agents/skills}"
 
 link() {
     local src="$1" dst="$2"
@@ -29,14 +30,14 @@ link() {
     echo "linked  $dst -> $src"
 }
 
-mkdir -p "$CLAUDE_DIR/skills"
+mkdir -p "$CLAUDE_DIR/skills" "$CODEX_DIR" "$CODEX_SKILLS_DIR"
 
-link "$REPO_DIR/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md"
-link "$REPO_DIR/settings.json" "$CLAUDE_DIR/settings.json"
+link "$REPO_DIR/claudecode/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md"
+link "$REPO_DIR/claudecode/settings.json" "$CLAUDE_DIR/settings.json"
+link "$REPO_DIR/codex/config.toml" "$CODEX_DIR/config.toml"
 
-for script in "$REPO_DIR"/*.sh; do
+for script in "$REPO_DIR"/claudecode/*.sh; do
     [ -e "$script" ] || continue
-    [ "$script" = "$SELF" ] && continue
     link "$script" "$CLAUDE_DIR/$(basename "$script")"
 done
 
@@ -44,4 +45,5 @@ for skill in "$REPO_DIR"/skills/*/; do
     [ -d "$skill" ] || continue
     skill="${skill%/}"
     link "$skill" "$CLAUDE_DIR/skills/$(basename "$skill")"
+    link "$skill" "$CODEX_SKILLS_DIR/$(basename "$skill")"
 done

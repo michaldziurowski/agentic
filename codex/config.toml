@@ -1,0 +1,19 @@
+model = "gpt-5.6-sol"
+model_reasoning_effort = "xhigh"
+personality = "pragmatic"
+
+[tui]
+status_line = [
+  "current-dir",
+  "git-branch",
+  "model-with-reasoning",
+  "used-tokens",
+  "context-used",
+  "estimated-thread-cost",
+  "five-hour-limit",
+  "weekly-limit",
+]
+status_line_use_colors = true
+
+[features]
+hooks = true
